@@ -1,4 +1,4 @@
-// Keyboard functions
+// PS/2 Keyboard functions
 // for the Small Device C Compiler (SDCC)
 
 #include <compiler.h>    // Please download this header file on this website (https://csy-tvgo.github.io/Keil-C51-C-to-SDCC-C-Converter/index_en.html).

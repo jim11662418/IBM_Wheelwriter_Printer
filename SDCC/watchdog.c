@@ -1,5 +1,5 @@
-//  Watchdog functions
-//  for the Small Device C Compiler (SDCC)
+// DS89C440 Watchdog functions
+// for the Small Device C Compiler (SDCC)
 
 #include "reg420.h"
 

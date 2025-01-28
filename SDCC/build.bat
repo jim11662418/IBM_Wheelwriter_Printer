@@ -1,18 +1,17 @@
-@ECHO OFF
-
-REM compile...
-sdcc -c main.c
+@echo off
+echo compiling...
 sdcc -c keyboard.c
 sdcc -c uart12.c
 sdcc -c watchdog.c
 sdcc -c wheelwriter.c
 
-REM link...
+echo linking...
 sdcc main.c keyboard.rel uart12.rel watchdog.rel wheelwriter.rel
 
-REM make Intel HEX file...
+echo generating Intel HEX file...
 packihx main.ihx > printer.hex
 
+echo cleaning up...
 REM optional cleanup...
 del *.asm
 del *.ihx
@@ -23,3 +22,5 @@ del *.mem
 del *.rel
 del *.rst
 del *.sym
+
+pause

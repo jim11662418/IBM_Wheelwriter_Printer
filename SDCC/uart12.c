@@ -1,12 +1,11 @@
-//************************************************************************//
-//                                                                        //
-//                       For use with 12 MHZ crystal                      //
-//                                                                        //
-//************************************************************************//
-// Interrupt driven serial 0 functions with RTS/CTS handshaking.
-// serial 0 uses receive buffers in internal MOVX SRAM. serial 0 in mode 1
-// uses timer 1 for baud rate generation. uart_init() must be called
-// before using UART. No syntax error checking.
+// Interrupt driven serial functions for DS89C440 MCU with RTS/CTS handshaking..
+// Both serial0 (for the console) and serial1 (for the Wheelwriter) use 
+// receive buffers in internal MOVX SRAM. Serial0 in mode 1 uses timer 1 
+// for baud rate generation. Serial1 in mode 2 uses the system clock for 
+// baud rate generation. 'init_serial0()' and 'init_serial1()' must be called 
+// before using UARTs. No syntax error handling. No handshaking.
+
+// for use with 12 MHz crystal
 
 // for the Small Device C Compiler (SDCC)
 

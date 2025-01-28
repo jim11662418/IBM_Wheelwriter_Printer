@@ -1,10 +1,9 @@
 //---------------------------------------------------------------------------------------------------------------------------------
-// Print on the Wheelwriter characters received from the serial port and, optionally, from the parallel port
-// or PS/2 keyboard. Compile with the Small Device C Compiler (SDCC).
+// Print on the Wheelwriter characters received from the serial port, parallel port or PS/2 keyboard. 
+
+// Compile with the Small Device C Compiler (SDCC).
 //----------------------------------------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------------------------------------
-// Copyright 2020-2024 Jim Loos
+// Copyright 2020-2025 Jim Loos
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,12 +19,8 @@
 // CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 // DEALINGS IN THE SOFTWARE.
 //----------------------------------------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------------------------------------
 // For use as the 'console', configure Teraterm (or other terminal emulator) for 
 // 9600bps, N-8-1, RTS/CTS flow control.
-//----------------------------------------------------------------------------------------------------------
-//
 //----------------------------------------------------------------------------------------------------------
 // Control for the earliest Wheelwriter models (3, 5 and 6) is performed by two circuit boards: 
 // the Function Board and the Printer Board. Each of these boards has an Intel MCS-51 type microcontroller
@@ -34,8 +29,6 @@
 // printing mechanism) to print the characters associated with each key press. The key to making a Wheelwriter
 // act as a printer is to connect to this serial link and send commands to the Printer Board like it would
 // normally receive coming from the Function Board.
-//----------------------------------------------------------------------------------------------------------
-//
 //----------------------------------------------------------------------------------------------------------
 // Use the following procedure to load object code into the DS89C440 flash memory:
 //  1. Configure Teraterm for 4800 bps, N-8-1, no flow control.
@@ -46,8 +39,6 @@
 //  6. The DS89C440 Loader will respond with 'G' for each record received and programmed without error.
 //  7. Re-configure Teraterm for 9600 bps, N-8-1 and RTS/CTS flow control.
 //  8. Remove the jumper to disable the bootloader and restart the application.
-//----------------------------------------------------------------------------------------------------------
-//
 //----------------------------------------------------------------------------------------------------------
 // Version 1.0 - Initial Arduino version
 // Version 1.1 - LPT port added to Arduino version
@@ -61,7 +52,6 @@
 // Version 3.6 - Revised wheelwriter.c for ASCII printwheel
 // Version 3.7 - SDCC version. Echo keys typed on Wheelwriter to console. Show
 //							 variables. Console fixed at 9600bps. Simplified initialization code.
-//----------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------
 // switch 1    off - linefeed only upon receipt of linefeed character (0x0A)
 //             on  - auto linefeed; linefeed is performed with each carriage return (0x0D)
@@ -150,7 +140,7 @@ __xdata volatile unsigned char __at(0x03F1) printWheel;  // 0x08: PS; 0x10: 15P;
 __code char banner[]   = "\n\nWheelwriter Printer Version 3.7\n"
                          "for Maxim DS89C440 MCU and SDCC\n"
                          "Compiled on " __DATE__ " at " __TIME__"\n"
-                         "Copyright 2019-2024 Jim Loos\n";
+                         "Copyright 2020-2025 Jim Loos\n";
 
 __code char help1[]   = "\n\nControl characters:\n"
                         "  BEL 0x07        spins the printwheel\n"
