@@ -1,10 +1,9 @@
 //---------------------------------------------------------------------------------------------------------------------------------
-// Print on the Wheelwriter characters received from the serial port and, optionally, from the parallel port
-// or PS/2 keyboard. Compile with the Keil C51 compiler.
-//----------------------------------------------------------------------------------------------------------
+// Print on the Wheelwriter characters received from the serial port, parallel port or PS/2 keyboard.
 //
+// Compile with the Keil C51 compiler.
 //----------------------------------------------------------------------------------------------------------
-// Copyright 2020-2024 Jim Loos
+// Copyright 2020-2025 Jim Loos
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,12 +19,8 @@
 // CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 //----------------------------------------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------------------------------------
 // For use as the 'console', configure Teraterm (or other terminal emulator) for
 // 9600bps, N-8-1, RTS/CTS flow control.
-//----------------------------------------------------------------------------------------------------------
-//
 //----------------------------------------------------------------------------------------------------------
 // Control for the earliest Wheelwriter models (3, 5 and 6) is performed by two circuit boards:
 // the Function Board and the Printer Board. Each of these boards has an Intel MCS-51 type microcontroller
@@ -34,8 +29,6 @@
 // printing mechanism) to print the characters associated with each key press. The key to making a Wheelwriter
 // act as a printer is to connect to this serial link and send commands to the Printer Board like it would
 // normally receive coming from the Function Board.
-//----------------------------------------------------------------------------------------------------------
-//
 //----------------------------------------------------------------------------------------------------------
 // Use the following procedure to load object code into the DS89C440 flash memory:
 //  1. Configure Teraterm for 4800 bps, N-8-1, no flow control.
@@ -46,8 +39,6 @@
 //  6. The DS89C440 Loader will respond with 'G' for each record received and programmed without error.
 //  7. Re-configure Teraterm for 9600 bps, N-8-1 and RTS/CTS flow control.
 //  8. Remove the jumper to disable the bootloader and restart the application.
-//----------------------------------------------------------------------------------------------------------
-//
 //----------------------------------------------------------------------------------------------------------
 // Version 1.0 - Initial Arduino version
 // Version 1.1 - LPT port added to Arduino version
@@ -61,8 +52,6 @@
 // Version 3.6 - Revised wheelwriter.c for ASCII printwheel
 // Version 3.7 - SDCC version. Echo keys typed on Wheelwriter to console. Show
 //							 variables. Console fixed at 9600bps. Simplified initialization code.
-//----------------------------------------------------------------------------------------------------------
-//
 //----------------------------------------------------------------------------------------------------------
 // switch 1    off - linefeed only upon receipt of linefeed character (0x0A)
 //             on  - auto linefeed; linefeed is performed with each carriage return (0x0D)
@@ -147,43 +136,44 @@ volatile unsigned char xdata wdResets   _at_ 0x3F0;         // count of watchdog
 volatile unsigned char xdata printWheel _at_ 0x3F1;         // 0x08: PS; 0x10: 15P; 0x20: 12P; 0x40: 10P; 0x21: none
 
 code char banner[]    = "\n\nWheelwriter Printer Version 3.7\n"
-                                    "for Maxim DS89C440 MCU and Keil C51\n"
-                                    "Compiled on " __DATE__ " at " __TIME__"\n"
-                                    "Copyright 2019-2024 Jim Loos\n";
+                        "for Maxim DS89C440 MCU and Keil C51\n"
+                        "Compiled on " __DATE__ " at " __TIME__"\n"
+                        "Copyright 2020-2025 Jim Loos\n";
 
 code char help1[]     = "\n\nControl characters:\n"
-                                    "  BEL 0x07        spins the printwheel\n"
-                                    "  BS  0x08        non-destructive backspace\n"
-                                    "  TAB 0x09        horizontal tab\n"
-                                    "  LF  0x0A        paper up one line\n"
-                                    "  VT  0x0B        paper up one line\n"
-                                    "  CR  0x0D        returns carriage to left margin\n"
-                                    "  ESC 0x1B        see Diablo 630 commands below...\n"
-                                    "\nDiablo 630 commands emulated:\n"
-                                    "  <ESC><O>        selects bold printing\n"
-                                    "  <ESC><&>        cancels bold printing\n"
-                                    "  <ESC><E>        selects continuous underlining\n"
-                                    "  <ESC><R>        cancels underlining\n"
-                                    "  <ESC><X>        cancels both bold and underlining\n"
-                                    "  <ESC><U>        half line feed\n"
-                                    "  <ESC><D>        reverse half line feed\n"
-                                    "  <ESC><BS>       backspace 1/120 inch\n"
-                                    "  <ESC><LF>       reverse line feed\n"
-                                    "<Space> for more, <ESC> to exit...";
+                        "  BEL 0x07        spins the printwheel\n"
+                        "  BS  0x08        non-destructive backspace\n"
+                        "  TAB 0x09        horizontal tab\n"
+                        "  LF  0x0A        paper up one line\n"
+                        "  VT  0x0B        paper up one line\n"
+                        "  CR  0x0D        returns carriage to left margin\n"
+                        "  ESC 0x1B        see Diablo 630 commands below...\n"
+                        "\nDiablo 630 commands emulated:\n"
+                        "  <ESC><O>        selects bold printing\n"
+                        "  <ESC><&>        cancels bold printing\n"
+                        "  <ESC><E>        selects continuous underlining\n"
+                        "  <ESC><R>        cancels underlining\n"
+                        "  <ESC><X>        cancels both bold and underlining\n"
+                        "  <ESC><U>        half line feed\n"
+                        "  <ESC><D>        reverse half line feed\n"
+                        "  <ESC><BS>       backspace 1/120 inch\n"
+                        "  <ESC><LF>       reverse line feed\n"
+                        "<Space> for more, <ESC> to exit...";
+
 code char help2[]     = "\n\nPrinter control not part of the Diablo 630 emulation:\n"
-                                    "  <ESC><u>        selects micro paper up\n"
-                                    "  <ESC><d>        selects micro paper down\n"
-                                    "  <ESC><b>        selects broken underlining\n"
-                                    "  <ESC><p>        selects Pica pitch (10 cpi)\n"
-                                    "  <ESC><e>        selects Elite pitch (12 cpi)\n"
-                                    "  <ESC><m>        selects Micro Elite pitch (15 cpi)\n"
-                                    "\nDiagnostics/debugging:\n"
-                                    "  <ESC><^Z><a>    show version information\n"
-                                    "  <ESC><^Z><e><n> flashing red LED on or off\n"
-                                    "  <ESC><^Z><p><n> show the value of Port n (0-3)\n"
-                                    "  <ESC><^Z><r>    reset the MCU\n"
-                                    "  <ESC><^Z><u>    show the uptime\n"
-                                    "  <ESC><^Z><v>    show variables\n";
+                        "  <ESC><u>        selects micro paper up\n"
+                        "  <ESC><d>        selects micro paper down\n"
+                        "  <ESC><b>        selects broken underlining\n"
+                        "  <ESC><p>        selects Pica pitch (10 cpi)\n"
+                        "  <ESC><e>        selects Elite pitch (12 cpi)\n"
+                        "  <ESC><m>        selects Micro Elite pitch (15 cpi)\n"
+                        "\nDiagnostics/debugging:\n"
+                        "  <ESC><^Z><a>    show version information\n"
+                        "  <ESC><^Z><e><n> flashing red LED on or off\n"
+                        "  <ESC><^Z><p><n> show the value of Port n (0-3)\n"
+                        "  <ESC><^Z><r>    reset the MCU\n"
+                        "  <ESC><^Z><u>    show the uptime\n"
+                        "  <ESC><^Z><v>    show variables\n";
 
 //------------------------------------------------------------
 // Timer 0 ISR: interrupt every 50 milliseconds, 20 times per second
@@ -407,30 +397,30 @@ void print_character(unsigned char charToPrint) {
 
         case 2:                                             // <ESC> ^Z has been recieved. this is the third character of the escape sequence...
             switch (charToPrint) {
-                       case 'A':
+                case 'A':
                 case 'a':
                     printf("\n%s\n",banner);
                     break;
-                        case 'E':
+                case 'E':
                 case 'e':                                   // <ESC><^Z><e> toggle red error LED
                     escape = 4;
                     break;
-                        case 'P':
+                case 'P':
                 case 'p':                                   // <ESC><^Z><p> print port values
                     escape = 3;
                     break;
-                        case 'R':
+                case 'R':
                 case 'r':                                   // <ESC><^Z><r> system reset
                     TA = 0xAA;                              // timed access
                     TA = 0x55;
                     FCNTL = 0x0F;                           // use the FCNTL register to preform a system reset
                     break;
-                        case 'U':
+                case 'U':
                 case 'u':                                   // <ESC><^Z><u> print uptime
                     printf("%s %02u%c%02u%c%02u\n","Uptime:",(int)hours,':',(int)minutes,':',(int)seconds);
                     escape = 0;
                     break;
-                        case 'V':
+                case 'V':
                 case 'v':                                   // <ESC><^Z><v> print variables
                     printf("\n");
                     printf("%s %s\n",    "switch1:        ",switch1 ? "off":"on");
@@ -486,17 +476,16 @@ void print_character(unsigned char charToPrint) {
                 printf(help2);                              // print the second half of the help
                 escape = 0;
             }
-                  else if (charToPrint == ESC) {                  // if it's ESCAPE, exit
-                     putchar(0x0D);
-                     escape = 0;
-                  }
+            else if (charToPrint == ESC) {                  // if it's ESCAPE, exit
+                putchar(0x0D);
+                escape = 0;
+            }
             break;
-
     } // switch (escape)
 }
 
 // table used by parseWWdata function below for converting printwheel characters to ASCII
-code const char printwheel2ASCII[96] = {
+code char printwheel2ASCII[96] = {
 // a    n    r    m    c    s    d    h    l    f    k    ,    V    _    G    U
    0x61,0x6E,0x72,0x6D,0x63,0x73,0x64,0x68,0x6C,0x66,0x6B,0x2C,0x56,0x2D,0x47,0x55,
 // F    B    Z    H    P    )    R    L    S    N    C    T    D    E    I    A
@@ -732,7 +721,7 @@ void main(void){
    unsigned int loopcounter = 0;
    unsigned int scancode, WWdata;
    unsigned char state = 0;
-	 unsigned char lastsec = 0;
+   unsigned char lastsec = 0;
 
    wd_disable_watchdog();                                   // disable wwtchdog timer reset
 
@@ -768,8 +757,8 @@ void main(void){
       case 0x40:
          printf("Power on reset\n\n");
          printf("Initializing");
-			   lastsec = seconds;
-			   timeout = ONESEC*6;															 // 6 seconds for wheelwriter to initialize
+         lastsec = seconds;
+         timeout = ONESEC*6;										  // 6 seconds for wheelwriter to initialize
          wdResets = 0;
          printWheel = 0;
          while (!printWheel) {                             // waiting for printwheel code...
@@ -833,10 +822,11 @@ void main(void){
                } // switch (state)
             } // if (ww_data_avail())
          } // while (!printWheel)
-				 if (!timeout) {
-				    errorLED = TRUE;
-						printf("\nWheelwriter timed out\n");
-				 }
+         
+			if (!timeout) {
+            errorLED = TRUE;
+				printf("\nWheelwriter timed out\n");
+         }
    } // switch (WDCON & 0x44)
 	 
    while (ww_data_avail()) {                           		// absorb any remaining data from the Wheelwriter...
@@ -853,13 +843,13 @@ void main(void){
 		  timeout = ONESEC;																		 // keyboard should respond within 1 second
 		  while (scancode != 0xAA) {
 				 scancode = kb_get_scancode();
-         //printf("0x%02X\n",(unsigned int)(scancode & 0xFF));
+             //printf("0x%02X\n",(unsigned int)(scancode & 0xFF));
 				 if (!timeout) {																	 // no acknowledge from keyboard
 					  errorLED = TRUE;
 						printf("PS/2 keyboard timed out\n");
 				 }
 			}
-      printf("PS/2 keyboard detected\n");
+         printf("PS/2 keyboard detected\n");
    }
 
    wd_clr_flags();                                         // clear watchdog reset and POR flags for next start up

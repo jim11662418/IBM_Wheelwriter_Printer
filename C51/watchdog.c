@@ -1,4 +1,4 @@
-// Watchdog functions 
+// DS89C440 Watchdog functions 
 // For the Keil C51 compiler.
 
 #include <reg420.h>

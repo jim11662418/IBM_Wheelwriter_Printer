@@ -1,13 +1,13 @@
-//************************************************************************//
-//                                                                        //
-//                       For use with 12 MHZ crystal                      //
-//                                                                        //
-//************************************************************************//
-// Interrupt driven serial 0 functions with RTS/CTS handshaking.
-// serial 0 uses receive buffers in internal MOVX SRAM. serial 0 in mode 1 
-// uses timer 1 for baud rate generation. uart_init must be called 
-// before using UART. No syntax error checking.
-// For the Keil C51 compiler.
+// Interrupt driven serial functions for DS89C440 MCU with RTS/CTS handshaking..
+// Both serial0 (for the console) and serial1 (for the Wheelwriter) use 
+// receive buffers in internal MOVX SRAM. Serial0 in mode 1 uses timer 1 
+// for baud rate generation. Serial1 in mode 2 uses the system clock for 
+// baud rate generation. 'init_serial0()' and 'init_serial1()' must be called 
+// before using UARTs. No syntax error handling. No handshaking.
+
+// For use with 12 MHZ crystal
+
+// for the Keil C51 compiler
 
 #include <reg420.h>
 
@@ -66,19 +66,21 @@ void uart0_isr(void) interrupt 4 using 3 {
 //  for baud rate generation. Note: baudrate values are for use with a 12MHz crystal.
 // ---------------------------------------------------------------------------
 void uart_init(void) {
-    rx_head = 0;                   		          // initialize head/tail pointers.
+    rx_head = 0;                   		           // initialize head/tail pointers.
     rx_tail = 0;
-    rx_remaining = BUFFERSIZE;                  // 128 characters
-    SCON0 = 0x50;                  			        // Serial 0 for mode 1.
+    rx_remaining = BUFFERSIZE;                    // 128 characters
+
     TMOD = (TMOD & 0x0F) | 0x20;   			        // Timer 1, mode 2, 8-bit reload.
-	  CKMOD |= 0x10;				   			        			// Make timer 1 clocked by OSC/1 instead of the default OSC/12
-    TH1 = 0xD9;                             		// 9600 bps
+    CKMOD |= 0x10;				   			        			// Make timer 1 clocked by OSC/1 instead of the default OSC/12
+    TH1 = 0xD9;                             		  // 9600 bps
     TR1 = TRUE;                    			        // Run timer 1.
+
+    SCON0 = 0x50;                  			        // Serial 0 for mode 1.
     REN = TRUE;                    			        // Enable receive characters.
     TI = TRUE;                     			        // Set TI of SCON to Get Ready to Send
     RI  = FALSE;                   			        // Clear RI of SCON to Get Ready to Receive
     ES0 = TRUE;                    			        // enable serial interrupt.
-    RTS = 0;                                    // clear RTS to allow transmissions from remote console
+    RTS = 0;                                      // clear RTS to allow transmissions from remote console
 }
 
 // ---------------------------------------------------------------------------
@@ -101,9 +103,9 @@ char uart_getchar(void) {
     
     ++rx_remaining;                                          // space remaining in buffer increases
     if (RTS) {                                               // if communication is now paused...
-         if (rx_remaining > RESUMELEVEL) {         
-            RTS = 0;                                         // clear RTS to resume communications when space remaining in buffer increases above 64 bytes
-         }  
+       if (rx_remaining > RESUMELEVEL) {         
+          RTS = 0;                                         // clear RTS to resume communications when space remaining in buffer increases above 64 bytes
+       }  
     }
     return(buf);
 }

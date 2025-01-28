@@ -1,4 +1,4 @@
-// Keyboard functions
+// PS/2 Keyboard functions
 // For the Keil C51 compiler.
 
 #include <stdio.h>
